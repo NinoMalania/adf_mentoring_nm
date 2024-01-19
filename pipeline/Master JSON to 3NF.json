@@ -1,0 +1,63 @@
+{
+	"name": "Master JSON to 3NF",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load JSON to DataLake",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DeltaLoadFiles",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Populate 3NF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load JSON to DataLake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "OnlinePurchase JSON to AzureSQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Archive DataLake JSON",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Populate 3NF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Archive OnlinePurchase",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-12-02T16:55:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

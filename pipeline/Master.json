@@ -1,0 +1,63 @@
+{
+	"name": "Master",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy files to Data Lake",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Load files to DataLake",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Populate 3NF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Copy files to Data Lake",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DataLake to AzureSQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Archive files in Data Lake",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Populate 3NF",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Archive",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-11-14T19:53:28Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

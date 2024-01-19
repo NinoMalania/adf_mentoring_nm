@@ -1,0 +1,392 @@
+{
+	"name": "Metadata_Driven ETL",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetMetadata",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "MetadataStorageTable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "IterateThroughRows",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetMetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetMetadata').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy from DataLake to Staging",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "pipelineId",
+											"value": {
+												"value": "@pipeline().RunId",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "source_filename",
+											"value": "$$FILENAME"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "@json(item().CopySinkSettings)?.preCopyScript",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"dataIntegrationUnits": {
+									"value": "@json(item().CopyActivitySettings).DIU",
+									"type": "Expression"
+								},
+								"translator": {
+									"value": "@json(item().CopyActivitySettings).translator",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MetadataCSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@json(item().SourceObjectSettings).fileName",
+											"type": "Expression"
+										},
+										"delimeter": {
+											"value": "@json(item().SourceObjectSettings).columnDelimiter",
+											"type": "Expression"
+										},
+										"folderpath": {
+											"value": "@json(item().SourceObjectSettings).folderPath",
+											"type": "Expression"
+										},
+										"filesystem": {
+											"value": "@json(item().SourceObjectSettings).fileSystem",
+											"type": "Expression"
+										},
+										"encoding": {
+											"value": "@json(item().SourceObjectSettings).encoding",
+											"type": "Expression"
+										},
+										"escapechar": {
+											"value": "@json(item().SourceObjectSettings).escapeChar",
+											"type": "Expression"
+										},
+										"quotechar": {
+											"value": "@json(item().SourceObjectSettings).quoteChar",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "MetadataAzureSQL",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": {
+											"value": "@json(item().SinkObjectSettings).table\n",
+											"type": "Expression"
+										},
+										"SchemaName": {
+											"value": "@json(item().SinkObjectSettings).schema",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Log Copy Activity",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy from DataLake to Staging",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[etl].[spPopulateLogTable]",
+								"storedProcedureParameters": {
+									"ActivityName": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.billingReference.activityType",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"BillingDuration": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.billingReference.totalBillableDuration[0].duration",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"CopyDuration": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.copyDuration",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"DIUUsed": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.usedDataIntegrationUnits",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"EndTime": {
+										"value": {
+											"value": "@addSeconds(activity('Copy from DataLake to Staging').output.executionDetails[0].start,activity('Copy from DataLake to Staging').output.executionDetails[0].duration)",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"FilesRead": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.filesRead",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"MeterType": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.billingReference.totalBillableDuration[0].meterType",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ParallelCopies": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.usedParallelCopies",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"PipelineName": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"QueueDuration": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.executionDetails[0].profile.queue.duration",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"RowsRead": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"RunId": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"StartTime": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.executionDetails[0].start",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"Status": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.executionDetails[0].status",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"TransferDuration": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.executionDetails[0].profile.transfer.duration",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"RowsCopied": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase1",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Log Copy errors",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy from DataLake to Staging",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[etl].[spPopulateErrorLogTable]",
+								"storedProcedureParameters": {
+									"ActivityName": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.billingReference.activityType",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ErrorCode": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.errors[0]?.Code",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ErrorMsg": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.errors[0]?.Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"FailureType": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.errors[0]?.EventType",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"PipelineName": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"RunId": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Time": {
+										"value": {
+											"value": "@activity('Copy from DataLake to Staging').output.executionDetails[0].start",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase1",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"Metadata": {
+				"type": "String"
+			},
+			"error": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-01-14T10:42:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

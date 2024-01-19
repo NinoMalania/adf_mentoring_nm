@@ -1,0 +1,17 @@
+{
+	"name": "mentoring-adf-nml",
+	"properties": {
+		"globalParameters": {
+			"LogicAppHTTPURI": {
+				"type": "string",
+				"value": "https://mentoring-key-vault-nml.vault.azure.net/secrets/LogicAppHTTP/10e903793abb43e089761e9ca7f2f6d6?api-version=7.0"
+			}
+		}
+	},
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "44afab7a-11d1-44b2-bd49-03667d1230be",
+		"tenantId": "b41b72d0-4e9f-4c26-8a69-f949f367c91d"
+	}
+}

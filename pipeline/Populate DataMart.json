@@ -1,0 +1,65 @@
+{
+	"name": "Populate DataMart",
+	"properties": {
+		"activities": [
+			{
+				"name": "Populate Dimension Tables",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow1",
+						"type": "DataFlowReference"
+					},
+					"integrationRuntime": {
+						"referenceName": "Azure-IR-M8",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Populate Fact Tables",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Populate Dimension Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow2",
+						"type": "DataFlowReference"
+					},
+					"integrationRuntime": {
+						"referenceName": "Azure-IR-M8",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-12-12T10:07:04Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

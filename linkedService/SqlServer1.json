@@ -1,0 +1,27 @@
+{
+	"name": "SqlServer1",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault1",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "MSSQL"
+			},
+			"userName": "EPAM\\Nino_Malania",
+			"password": {
+				"type": "SecureString",
+				"value": "**********"
+			}
+		},
+		"connectVia": {
+			"referenceName": "Self-hostedIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"name": "MetadataCSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filename": {
+				"type": "string"
+			},
+			"delimeter": {
+				"type": "string"
+			},
+			"folderpath": {
+				"type": "string"
+			},
+			"filesystem": {
+				"type": "string"
+			},
+			"encoding": {
+				"type": "string"
+			},
+			"escapechar": {
+				"type": "string"
+			},
+			"quotechar": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().folderpath",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().filesystem",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@dataset().delimeter",
+				"type": "Expression"
+			},
+			"encodingName": {
+				"value": "@dataset().encoding",
+				"type": "Expression"
+			},
+			"escapeChar": {
+				"value": "@dataset().escapechar",
+				"type": "Expression"
+			},
+			"firstRowAsHeader": true,
+			"quoteChar": {
+				"value": "@dataset().quotechar",
+				"type": "Expression"
+			}
+		},
+		"schema": [
+			{
+				"name": "cast",
+				"type": "String"
+			},
+			{
+				"name": "crew",
+				"type": "String"
+			},
+			{
+				"name": "id",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

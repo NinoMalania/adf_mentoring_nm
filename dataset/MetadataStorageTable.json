@@ -1,0 +1,43 @@
+{
+	"name": "MetadataStorageTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SourceObjectSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SinkObjectSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CopySinkSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CopyActivitySettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DataLoadingBehaviorSettings",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "etl",
+			"table": "tControlMetadata"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

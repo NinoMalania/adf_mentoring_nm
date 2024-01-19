@@ -1,0 +1,18 @@
+{
+	"name": "SourceDataset_vm8",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageOnline",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "online"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

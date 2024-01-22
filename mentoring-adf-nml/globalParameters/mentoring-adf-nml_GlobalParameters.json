@@ -1,0 +1,6 @@
+{
+	"LogicAppHTTPURI": {
+		"type": "string",
+		"value": "https://mentoring-key-vault-nml.vault.azure.net/secrets/LogicAppHTTP/10e903793abb43e089761e9ca7f2f6d6?api-version=7.0"
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "mentoring-adf-nml"
+		},
+		"SqlServer1_password": {
+			"value": ""
+		},
+		"AUBlobStorage_sasUri": {
+			"value": ""
+		},
+		"AzureBlobStorage1_properties_typeProperties_sasUri_secretName": {
+			"value": "BlobSAS1"
+		},
+		"AzureBlobStorageOnline_properties_typeProperties_sasUri_secretName": {
+			"value": "BlobOnlineSAS"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://azurementoringdatalakeml.dfs.core.windows.net"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://mentoring-key-vault-nml.vault.azure.net/"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_connectionString_secretName": {
+			"value": "AzureSQL"
+		},
+		"AzureSqlDatabaseDataMart_properties_typeProperties_connectionString_secretName": {
+			"value": "AzureSQLDataMart"
+		},
+		"SqlServer1_properties_typeProperties_connectionString_secretName": {
+			"value": "MSSQL"
+		},
+		"SqlServer1_properties_typeProperties_userName": {
+			"value": "EPAM\\Nino_Malania"
+		}
+	}
+}
